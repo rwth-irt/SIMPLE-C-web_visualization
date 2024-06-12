@@ -1,60 +1,63 @@
 import * as THREE from 'three';
-import { ArcballControls } from 'three/addons/controls/ArcballControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const renderer = new THREE.WebGLRenderer({
-    antialias: true
-});
+// Basic Three.js setup
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcccccc);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xcccccc);
-
-
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-const controls = new ArcballControls(camera, renderer.domElement, scene);
-controls.addEventListener('change', function () {
-    renderer.render(scene, camera);
-});
-
-
-// add point cloud
-function generatePointCloudGeometry(color: THREE.Color, width: number, length: number, scale: number) {
-    const geometry = new THREE.BufferGeometry();
-    const numPoints = width * length;
-    const positions = new Float32Array(numPoints * 3);
-    const colors = new Float32Array(numPoints * 3);
-    let k = 0;
-    for (let i = 0; i < width; i++) {
-        for (let j = 0; j < length; j++) {
-            const u = i / width;
-            const v = j / length;
-            const x = u - 0.5;
-            const y = (Math.cos(u * Math.PI * 4) + Math.sin(v * Math.PI * 8)) / 20;
-            const z = v - 0.5;
-
-            positions[3 * k] = x * scale;
-            positions[3 * k + 1] = y * scale;
-            positions[3 * k + 2] = z * scale;
-
-            const intensity = (y + 0.1) * 5;
-            colors[3 * k] = color.r * intensity;
-            colors[3 * k + 1] = color.g * intensity;
-            colors[3 * k + 2] = color.b * intensity;
-
-            k++;
-        }
-    }
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.computeBoundingBox();
-    return geometry;
-}
-const geometry = generatePointCloudGeometry(new THREE.Color(1, 0, 0), 10, 10, 10);
-const material = new THREE.PointsMaterial({ size: 0.1, vertexColors: true });
+// Points geometry
+const geometry = new THREE.BufferGeometry();
+const vertices = new Float32Array([
+    // Example positions for points
+    1, 2, 3,
+    4, 5, 6,
+    7, 8, 9,
+]);
+geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+const material = new THREE.PointsMaterial({ color: 0x333333, size: 0.3 });
 const points = new THREE.Points(geometry, material);
 scene.add(points);
 
-//controls.update() must be called after any manual changes to the camera's transform
-camera.position.set(0, 10, 0);
+// OrbitControls for camera
+const controls = new OrbitControls(camera, renderer.domElement);
+camera.position.set(0, 0, 10);
 controls.update();
+
+// Raycaster and mouse vector
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+// Event listener for click
+renderer.domElement.addEventListener('dblclick', (event) => {
+    // Calculate mouse position in normalized device coordinates
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // Update the raycaster
+    raycaster.setFromCamera(mouse, camera);
+
+    // Calculate intersections
+    const intersects = raycaster.intersectObject(points);
+
+    if (intersects.length > 0) {
+        // Get the intersected point
+        const intersect = intersects[0];
+        const point = intersect.point;
+
+        // Focus camera on the clicked point
+        camera.position.set(point.x, point.y, point.z + 10);
+        controls.target.set(point.x, point.y, point.z);
+        controls.update();
+    }
+});
+
+// Render loop
+function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+}
+animate();
