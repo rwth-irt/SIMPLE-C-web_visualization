@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { set_callback } from './ws';
 
 // Basic Three.js setup
 const scene = new THREE.Scene();
@@ -9,18 +10,17 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Points geometry
-const geometry = new THREE.BufferGeometry();
-const vertices = new Float32Array([
-    // Example positions for points
-    1, 2, 3,
-    4, 5, 6,
-    7, 8, 9,
-]);
-geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-const material = new THREE.PointsMaterial({ color: 0x333333, size: 0.3 });
-const points = new THREE.Points(geometry, material);
-scene.add(points);
+let current_group: THREE.Group | undefined = undefined;
+
+function new_objects(group: THREE.Group) {
+    if (current_group) {
+        scene.remove(current_group);
+    }
+    scene.add(group);
+    current_group = group;
+}
+set_callback(g => new_objects(g));
+
 
 // OrbitControls for camera
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -33,6 +33,9 @@ const mouse = new THREE.Vector2();
 
 // Event listener for click
 renderer.domElement.addEventListener('dblclick', (event) => {
+    if (!current_group)
+        return;
+    
     // Calculate mouse position in normalized device coordinates
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -41,7 +44,7 @@ renderer.domElement.addEventListener('dblclick', (event) => {
     raycaster.setFromCamera(mouse, camera);
 
     // Calculate intersections
-    const intersects = raycaster.intersectObject(points);
+    const intersects = raycaster.intersectObject(current_group);
 
     if (intersects.length > 0) {
         // Get the intersected point
