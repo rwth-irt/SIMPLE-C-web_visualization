@@ -112,7 +112,7 @@ function new_calib_message(msg: CalibMessage) {
 
 function get_color_from_index(i: number, frame_index: number, marker_index?: number): number[] {
     if (marker_index && i == marker_index)
-        return colors.marker;
+        return colors.reflector;
     if (i == -1)
         return colors.bright;
     if (i >= 0)
@@ -189,8 +189,8 @@ function schedule_test_msgs() {
             {
                 topic: "b",
                 points: [1, 2, 3.3, 1.3, 2, 4, 2.3, 3, 5, 4.3, 3, 6, 2, 2.3, 4, 5, 4, 4, 3, -2, -3, -1, 1, -1.2],
-                colors: [1, 1, 1, 1, 1, 1, 1, 1],
-                marker_index: 3
+                colors: [1, 1, 2, 1, 1, 1, 1, 1],
+                marker_index: 2
             }
         ],
         transformations: [
