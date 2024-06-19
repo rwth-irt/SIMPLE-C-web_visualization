@@ -33,12 +33,17 @@ function connect() {
     socket.addEventListener("open", () => {
         connected = true;
         console.log("Connected")
+        alert("Connected")
     });
     socket.addEventListener("error", () => {
         connected = false;
+        console.log("Connection error")
+        alert("Connection error")
     });
     socket.addEventListener("close", () => {
         connected = false;
+        console.log("Connection closed")
+        alert("Connection closed")
     });
 }
 document.getElementById("connect_btn")!.addEventListener("click", connect);
@@ -53,6 +58,11 @@ let colors = {
     trace: [0.5, 0.706 / 2, 0.],  // Brown
     normal: [1., 1., 0.]  // yellow
 }
+let basic_colors = [
+    [0.55, 0.53, 0.5], // orange-ish tint
+    [0.5, 0.5, 0.55], // blue tint
+    [0.5, 0.55, 0.5], // green tint
+]
 
 let callback: ((group: THREE.Group) => void) | undefined = undefined;
 export function set_callback(c: (group: THREE.Group) => void) {
@@ -66,11 +76,13 @@ function new_calib_message(msg: CalibMessage) {
     let group = new THREE.Group();
     // construct Points objects
     let pointclouds: Map<string, THREE.Points> = new Map();
+    let frame_index = -1;
     for (let f of msg.frames) {
+        frame_index++;
         let vertices = new Float32Array(f.points);
         let colors = new Float32Array(3 * f.colors.length);
         for (let i = 0; i < f.colors.length; i++) {
-            let c = get_color_from_index(f.colors[i], f.marker_index);
+            let c = get_color_from_index(f.colors[i], frame_index, f.marker_index);
             colors[3 * i + 0] = c[0];
             colors[3 * i + 1] = c[1];
             colors[3 * i + 2] = c[2];
@@ -98,14 +110,14 @@ function new_calib_message(msg: CalibMessage) {
     }
 }
 
-function get_color_from_index(i: number, marker_index?: number): number[] {
+function get_color_from_index(i: number, frame_index: number, marker_index?: number): number[] {
     if (marker_index && i == marker_index)
         return colors.marker;
     if (i == -1)
         return colors.bright;
     if (i >= 0)
         return colors.cluster;
-    return colors.any;
+    return basic_colors[frame_index % basic_colors.length];
 }
 
 
@@ -197,4 +209,4 @@ function schedule_test_msgs() {
     setTimeout(() => { new_calib_message(test_message3); }, 5000);
     setTimeout(() => { new_calib_message(test_message4); }, 7000);
 }
-schedule_test_msgs();
+// schedule_test_msgs();

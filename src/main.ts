@@ -29,18 +29,15 @@ set_callback(g => new_objects(g));
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
 
+// Create a marker at the controls' target point
+const markerGeometry = new THREE.SphereGeometry(0.1, 32, 32);
+const markerMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+scene.add(marker);
+
 // Raycaster and mouse vector
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-
-// TODO test object: floor
-
-const geometry = new THREE.PlaneGeometry(20, 20);
-const material = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
-const plane = new THREE.Mesh(geometry, material);
-scene.add(plane);
-console.log(plane.position)
-console.log(new THREE.Euler().setFromQuaternion(plane.quaternion))
 
 // Event listener for click
 renderer.domElement.addEventListener('dblclick', (event) => {
@@ -72,6 +69,8 @@ renderer.domElement.addEventListener('dblclick', (event) => {
 // Render loop
 function animate() {
     requestAnimationFrame(animate);
+    marker.position.copy(controls.target);
+    controls.update();
     renderer.render(scene, camera);
 }
 animate();
