@@ -25,7 +25,7 @@ function connect() {
     if (connected)
         return;
 
-    let socket = new WebSocket("ws://localhost:6789");
+    let socket = new WebSocket((document.getElementById("address_input") as HTMLInputElement).value);
     socket.addEventListener("message", (event) => {
         let data: CalibMessage = JSON.parse(event.data);
         new_calib_message(data);
@@ -69,6 +69,9 @@ export function set_callback(c: (group: THREE.Group) => void) {
     callback = c;
 }
 
+// Buffers for pointcloud data
+let buffers: Map<string, THREE.BufferGeometry> = new Map();
+
 /**
  * Construct a new colored Points object from the message
  */
@@ -79,19 +82,45 @@ function new_calib_message(msg: CalibMessage) {
     let frame_index = -1;
     for (let f of msg.frames) {
         frame_index++;
-        let vertices = new Float32Array(f.points);
-        let colors = new Float32Array(3 * f.colors.length);
+
+        // create buffer if required
+        let new_buffer = false;
+        if (!buffers.has(f.topic)) {
+            new_buffer = true;
+        } else {
+            // invalidate cache if length does not match
+            new_buffer = f.points.length != buffers.get(f.topic)!.getAttribute("position").array.length;
+            buffers.get(f.topic)!.dispose(); // dispose old buffer!
+        }
+        if (new_buffer){
+            let vertices = new Float32Array(f.points);
+            let colors = new Float32Array(3 * f.colors.length);
+            let geometry = new THREE.BufferGeometry(); // TODO use cached variant!!!!
+            geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            buffers.set(f.topic, geometry);
+        }
+        let bg = buffers.get(f.topic)!;
+        let colors = bg.getAttribute("color").array;
+        let positions = bg.getAttribute("position").array;
+        let pts = f.points;
+
+        // copy data to buffers, parsed json can then be gcollected.
+        for (let i = 0; i < pts.length; i++) {
+            positions[i] = pts[i];
+        }
         for (let i = 0; i < f.colors.length; i++) {
             let c = get_color_from_index(f.colors[i], frame_index, f.marker_index);
             colors[3 * i + 0] = c[0];
             colors[3 * i + 1] = c[1];
             colors[3 * i + 2] = c[2];
         }
-        let geometry = new THREE.BufferGeometry(); // TODO use cached variant!!!!
-        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-        let material = new THREE.PointsMaterial({ size: 0.3, vertexColors: true });
-        let points = new THREE.Points(geometry, material);
+        bg.getAttribute("color").needsUpdate = true;
+        bg.getAttribute("position").needsUpdate = true;
+
+        // export new Three group
+        let material = new THREE.PointsMaterial({ size: 0.15, vertexColors: true });
+        let points = new THREE.Points(bg, material);
         pointclouds.set(f.topic, points);
         group.add(points);
     }
