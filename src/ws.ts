@@ -92,7 +92,7 @@ function new_calib_message(msg: CalibMessage) {
             new_buffer = f.points.length != buffers.get(f.topic)!.getAttribute("position").array.length;
             buffers.get(f.topic)!.dispose(); // dispose old buffer!
         }
-        if (new_buffer){
+        if (new_buffer) {
             let vertices = new Float32Array(f.points);
             let colors = new Float32Array(3 * f.colors.length);
             let geometry = new THREE.BufferGeometry(); // TODO use cached variant!!!!
@@ -148,3 +148,19 @@ function get_color_from_index(i: number, frame_index: number, marker_index?: num
         return colors.cluster;
     return basic_colors[frame_index % basic_colors.length];
 }
+
+
+// add test functionality
+function scroll_test_data(data: CalibMessage[], i: number) {
+    new_calib_message(data[i]);
+    if (i < data.length - 1) {
+        setTimeout(() => scroll_test_data(data, i + 1), 500);
+    }
+}
+document.getElementById("test_btn")?.addEventListener("click", () => {
+    // must be a file with a json containing a single list of CalibMessage
+    fetch("./test_messages.txt")
+        .then(res => res.json())
+        .then(out => scroll_test_data(out, 0))
+        .catch(err => { console.log("Error:", err) });
+});
