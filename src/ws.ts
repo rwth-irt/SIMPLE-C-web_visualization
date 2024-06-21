@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import testjson_url from "../testdata/test_messages.txt?url";
 
 export interface CalibMessage {
     frames: {
@@ -159,7 +160,7 @@ function scroll_test_data(data: CalibMessage[], i: number) {
 }
 document.getElementById("test_btn")?.addEventListener("click", () => {
     // must be a file with a json containing a single list of CalibMessage
-    fetch("./test_messages.txt")
+    fetch(testjson_url)
         .then(res => res.json())
         .then(out => scroll_test_data(out, 0))
         .catch(err => { console.log("Error:", err) });
