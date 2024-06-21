@@ -6,13 +6,13 @@ import { set_callback } from './ws';
 THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0,0,1); // set z up, as in lidar data
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xfafafa);
-let width = 800;
-let height = 600;
+let height = window.innerHeight * 0.8;
+let width = height * 1.3;
 const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
 camera.position.set(0, 0, 10);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
-document.body.appendChild(renderer.domElement);
+document.getElementById("threedif")!.appendChild(renderer.domElement);
 
 let current_group: THREE.Group | undefined = undefined;
 

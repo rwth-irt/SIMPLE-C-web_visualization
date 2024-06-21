@@ -1,5 +1,5 @@
 {
-  "name": "basic1",
+  "name": "lidar_calib_monitor",
   "private": true,
   "version": "0.0.0",
   "type": "module",
