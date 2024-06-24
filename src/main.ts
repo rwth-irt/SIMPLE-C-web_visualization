@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { set_callback } from './ws';
+import { connect } from './ws';
+import { Sensor } from './sensor_data';
 
 // Basic Three.js setup
 THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0,0,1); // set z up, as in lidar data
@@ -14,28 +15,10 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(width, height);
 document.getElementById("threedif")!.appendChild(renderer.domElement);
 
-let current_group: THREE.Group | undefined = undefined;
-
-function new_objects(group: THREE.Group) {
-    if (current_group) {
-        scene.remove(current_group);
-    }
-    scene.add(group);
-    current_group = group;
-}
-set_callback(g => new_objects(g));
-
-
 // OrbitControls for camera
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
 
-// create origin marker
-const origin_marker = new THREE.Mesh(
-    new THREE.SphereGeometry(0.2, 32, 32), 
-    new THREE.MeshBasicMaterial({ color: 0x000000 })
-);
-scene.add(origin_marker);
 // Create a marker at the controls' target point
 const marker = new THREE.Mesh(
     new THREE.SphereGeometry(0.1, 32, 32), 
@@ -43,36 +26,38 @@ const marker = new THREE.Mesh(
 );
 scene.add(marker);
 
-// Raycaster and mouse vector
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-// Event listener for click
-renderer.domElement.addEventListener('dblclick', (event) => {
-    if (!current_group)
-        return;
-    
-    // Calculate mouse position in normalized device coordinates
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    // Update the raycaster
-    raycaster.setFromCamera(mouse, camera);
-
-    // Calculate intersections
-    const intersects = raycaster.intersectObject(current_group);
-
-    if (intersects.length > 0) {
-        // Get the intersected point
-        const intersect = intersects[0];
-        const point = intersect.point;
-
-        // Focus camera on the clicked point
-        camera.position.set(point.x, point.y, point.z + 10);
-        controls.target.set(point.x, point.y, point.z);
-        controls.update();
-    }
+// add ws handler
+document.getElementById("connect_btn")!.addEventListener("click", ()=> {
+    let sensors: Map<string, Sensor> = new Map();
+    connect(data => {
+        // this is called on every Websocket message
+        let type: "pointcloud" | "metadata" = data.type;
+        let topic: string = data.topic;
+        console.log(`New message with type ${type}, topic ${topic}`)
+        if (!sensors.has(topic)) {
+            sensors.set(topic, new Sensor(topic, scene));
+        }
+        let sensor = sensors.get(topic)!;
+        if (type == "metadata") {
+            let payload = data.data as {
+                reflector_locations: number[],
+                transformation: {
+                    t: number[],
+                    R_quat: number[]
+                }
+            }
+            sensor.on_metadata(payload.reflector_locations, payload.transformation);
+        }
+        if (type == "pointcloud") {
+            let payload = data.data as {
+                points: number[],
+                colors: number[]
+            }
+            sensor.on_frame(payload.points, payload.colors);
+        }
+    });
 });
+
 
 // Render loop
 function animate() {
