@@ -1,29 +1,32 @@
 
-let connected = false;
-export function connect(msg_callback: (data: any)=>void) {
-    console.log("Connecting...")
-    if (connected)
-        return;
+let socket: WebSocket | undefined = undefined;
+let no_alerts = false;
 
-    let socket = new WebSocket((document.getElementById("address_input") as HTMLInputElement).value);
+export function connect(msg_callback: (data: any) => void) {
+    console.log("Connecting...");
+    if (socket) {
+        socket.close();
+    }
+    no_alerts = false;
+    socket = new WebSocket((document.getElementById("address_input") as HTMLInputElement).value);
     socket.addEventListener("message", (event) => {
-        console.log("New message")
         let data = JSON.parse(event.data);
         msg_callback(data);
     });
     socket.addEventListener("open", () => {
-        connected = true;
         console.log("Connected")
         alert("Connected")
     });
     socket.addEventListener("error", () => {
-        connected = false;
+        socket = undefined;
         console.log("Connection error")
         alert("Connection error")
+        no_alerts = true;
     });
     socket.addEventListener("close", () => {
-        connected = false;
+        socket = undefined;
         console.log("Connection closed")
-        alert("Connection closed")
+        if (!no_alerts)
+            alert("Connection closed")
     });
 }

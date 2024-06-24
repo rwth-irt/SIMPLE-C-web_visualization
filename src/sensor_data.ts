@@ -14,7 +14,6 @@ export class Sensor {
     readonly index: number
 
     // threejs specific
-    point_pool: PointPool = new PointPool();
     three_points?: THREE.Points;
     three_scene: THREE.Scene;
     three_group?: THREE.Group;
@@ -92,45 +91,52 @@ export class Sensor {
         // update reflector points
         //   remove them
         for (let p of this.reflector_points) {
-            this.three_group!.remove(p);
-            this.point_pool.recycle(p);
+            this.three_group!.remove(p); // TODO dispose? use pooling!
         }
+        this.reflector_points = [];
+
         //   re-add them
         for (let i = 0; i < this.reflector_locations!.length; i++) {
-            let p = this.point_pool.get_new();
-            // TODO do we have to reset anything? Does this *add* translation?
-            p.translateX(this.reflector_locations![i*3]);
-            p.translateY(this.reflector_locations![i*3+1]);
-            p.translateZ(this.reflector_locations![i*3+2]);
+            let pt = new THREE.Mesh(
+                new THREE.SphereGeometry(0.05, 16, 16),
+                new THREE.MeshBasicMaterial({ color: 0xd8b343 })
+            );
+            this.reflector_points.push(pt);
+            let pos = this.reflector_locations!;
+            pt.position.set(
+                pos[i * 3 + 0],
+                pos[i * 3 + 1],
+                pos[i * 3 + 2]
+            );
+            this.three_group!.add(pt);
         }
 
         // set transformation of whole group
         let q = this.trafo!.R_quat;
-        this.three_group!.applyQuaternion(new THREE.Quaternion(q[0], q[1], q[2], q[3]));
-        this.three_group!.translateX(this.trafo!.t[0]);
-        this.three_group!.translateY(this.trafo!.t[1]);
-        this.three_group!.translateZ(this.trafo!.t[2]);
+        let t = this.trafo!.t;
+        this.three_group!.quaternion.set(q[0], q[1], q[2], q[3]);
+        this.three_group!.position.set(t[0], t[1], t[2]);
     }
 }
 
-class PointPool {
-    available: THREE.Mesh[] = [];
-    private material = new THREE.MeshBasicMaterial({ color: 0xd8b343 });
+// class PointPool {
+//     available: THREE.Mesh[] = [];
+//     private material = new THREE.MeshBasicMaterial({ color: 0xd8b343 });
 
-    get_new() {
-        if (this.available) {
-            return this.available.pop()!;
-        }
-        return new THREE.Mesh(
-            new THREE.SphereGeometry(0.1, 16, 16),
-            this.material
-        );
-    }
+//     get_new() {
+//         if (this.available.length > 0) {
+//             return this.available.pop()!;
+//         }
+//         return new THREE.Mesh(
+//             new THREE.SphereGeometry(0.1, 16, 16),
+//             this.material
+//         );
+//     }
 
-    recycle(sphere: THREE.Mesh) {
-        this.available.push(sphere);
-    }
-}
+//     recycle(sphere: THREE.Mesh) {
+//         this.available.push(sphere);
+//     }
+// }
 
 
 // Color stuff

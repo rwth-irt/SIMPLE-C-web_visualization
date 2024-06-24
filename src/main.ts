@@ -33,7 +33,6 @@ document.getElementById("connect_btn")!.addEventListener("click", ()=> {
         // this is called on every Websocket message
         let type: "pointcloud" | "metadata" = data.type;
         let topic: string = data.topic;
-        console.log(`New message with type ${type}, topic ${topic}`)
         if (!sensors.has(topic)) {
             sensors.set(topic, new Sensor(topic, scene));
         }
