@@ -8,6 +8,9 @@ interface Trafo {
 export class Sensor {
     static index_counter = 0;
 
+    static point_geometry = new THREE.SphereGeometry(0.05, 16, 16);
+    static point_material = new THREE.MeshBasicMaterial({ color: 0xd8b343 });
+
     readonly topic: string
     reflector_locations?: number[]
     trafo?: Trafo
@@ -27,8 +30,9 @@ export class Sensor {
     }
 
     private init_threejs(point_number: number) {
-        let vertices = new Float32Array(3 * point_number);
-        let colors = new Float32Array(3 * point_number);
+        // create buffer arrays, make them bigger to have extra space if we receive more points later
+        let vertices = new Float32Array(3 * point_number * 1.3);
+        let colors = new Float32Array(3 * point_number * 1.3);
         let buffer_geometry = new THREE.BufferGeometry();
         buffer_geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
         buffer_geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
@@ -58,16 +62,27 @@ export class Sensor {
         let colors_buffer = bg.getAttribute("color").array;
         let points_buffer = bg.getAttribute("position").array;
 
+        // ensure we do not write more points than our buffer size
+        let values_to_copy = Math.min(points_buffer.length, points.length);
+        if (values_to_copy != points.length) {
+            console.log("WARNING: BUFFER IS TOO SMALL!")
+        }
         // copy data to buffers, parsed json can then be gcollected.
-        for (let i = 0; i < points.length; i++) {
+        for (let i = 0; i < values_to_copy; i++) {
             points_buffer[i] = points[i];
         }
-        for (let i = 0; i < colors.length; i++) {
+        for (let i = 0; i < values_to_copy / 3; i++) {
             let c = get_color_from_index(colors[i], this.index);
             colors_buffer[3 * i + 0] = c[0];
             colors_buffer[3 * i + 1] = c[1];
             colors_buffer[3 * i + 2] = c[2];
         }
+        bg.setDrawRange(0, values_to_copy / 3);
+        // TODO I sometimes get the error 
+        //   THREE.BufferGeometry.computeBoundingSphere(): Computed radius is NaN.
+        //   The "position" attribute is likely to have NaN values.
+        // Ignoring it for now, can not determine easily from docs if to set setDrawRange to values/3 or values.
+
         // set three's update flags
         bg.getAttribute("color").needsUpdate = true;
         bg.getAttribute("position").needsUpdate = true;
@@ -91,16 +106,13 @@ export class Sensor {
         // update reflector points
         //   remove them
         for (let p of this.reflector_points) {
-            this.three_group!.remove(p); // TODO dispose? use pooling!
+            this.three_group!.remove(p);
         }
         this.reflector_points = [];
 
         //   re-add them
         for (let i = 0; i < this.reflector_locations!.length; i++) {
-            let pt = new THREE.Mesh(
-                new THREE.SphereGeometry(0.05, 16, 16),
-                new THREE.MeshBasicMaterial({ color: 0xd8b343 })
-            );
+            let pt = new THREE.Mesh(Sensor.point_geometry, Sensor.point_material);
             this.reflector_points.push(pt);
             let pos = this.reflector_locations!;
             pt.position.set(
@@ -117,26 +129,14 @@ export class Sensor {
         this.three_group!.quaternion.set(q[0], q[1], q[2], q[3]);
         this.three_group!.position.set(t[0], t[1], t[2]);
     }
+
+    destruct() {
+        if (this.three_points)
+            this.three_points.geometry.dispose();
+        if (this.three_group)
+            this.three_scene.remove(this.three_group);
+    }
 }
-
-// class PointPool {
-//     available: THREE.Mesh[] = [];
-//     private material = new THREE.MeshBasicMaterial({ color: 0xd8b343 });
-
-//     get_new() {
-//         if (this.available.length > 0) {
-//             return this.available.pop()!;
-//         }
-//         return new THREE.Mesh(
-//             new THREE.SphereGeometry(0.1, 16, 16),
-//             this.material
-//         );
-//     }
-
-//     recycle(sphere: THREE.Mesh) {
-//         this.available.push(sphere);
-//     }
-// }
 
 
 // Color stuff
