@@ -90,4 +90,11 @@
     }
 </script>
 
-<div bind:this={div}></div>
+<div id="threediv" bind:this={div}></div>
+
+<style>
+    #threediv {
+        border: 1px solid gray;
+        margin-top: 1em;
+    }
+</style>

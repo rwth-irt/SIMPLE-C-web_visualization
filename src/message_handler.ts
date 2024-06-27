@@ -36,7 +36,8 @@ export function on_message(data: any) {
         let map = get(pair_metadata);
         let key = msg.from_topic + msg.to_topic;
         if (!map.has(key)) {
-            map.set(key, writable(msg));
+            map.set(key, writable(msg)); // Map's set(!)
+            pair_metadata.set(map); // update UI: store's set!
         } else {
             map.get(key)!.set(msg); // update only existing store
         }
