@@ -58,6 +58,11 @@ function on_message(data: any) {
 }
 
 document.getElementById("connect_btn")!.addEventListener("click", () => {
+    if (sensors) {
+        Sensor.index_counter = 0;
+        for (let sensor of sensors.values())
+            sensor.destruct();
+    }
     sensors = new Map();
     connect(data => on_message(data));
 });

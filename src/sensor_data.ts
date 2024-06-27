@@ -151,9 +151,9 @@ let colors = {
     normal: [1., 1., 0.]  // yellow
 }
 let basic_colors = [
-    [0.55, 0.53, 0.5], // orange-ish tint
-    [0.5, 0.5, 0.55], // blue tint
-    [0.5, 0.55, 0.5], // green tint
+    [0.59, 0.55, 0.5], // orange-ish tint
+    [0.5, 0.5, 0.59], // blue tint
+    [0.5, 0.59, 0.5], // green tint
 ]
 
 function get_color_from_index(i: number, frame_index: number): number[] {
