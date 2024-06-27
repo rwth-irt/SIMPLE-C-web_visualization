@@ -28,15 +28,12 @@ export interface PairMetadataMsg {
     from_topic: string
     to_topic: string
     transformation: {
-        t: number[],
-        R_euler: number[],
-        R_sensitivity: number[]
+        t: number[]
+        R_euler: number[]
+        sensitivity_number: number
     }
-    number_point_pairs: number,
-    tracking_state: {
-        from_state: string
-        to_state: string
-    }
+    used_point_pairs: number,
+    total_point_pairs: number
 }
 
 export interface TrackingStateMsg {

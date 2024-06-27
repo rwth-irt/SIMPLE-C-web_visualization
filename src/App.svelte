@@ -1,6 +1,7 @@
 <script lang="ts">
     import { on_message } from "./message_handler";
     import Three from "./Three.svelte";
+    import TrafoOverview from "./TrafoOverview.svelte";
     import { connect_websocket } from "./ws";
 
     function on_connect_button() {
@@ -18,4 +19,6 @@
     />
     <button on:click={on_connect_button}>Connect WS</button>
     <Three></Three>
+
+    <TrafoOverview></TrafoOverview>
 </main>
