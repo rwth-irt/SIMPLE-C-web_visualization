@@ -3,10 +3,19 @@
     import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     import { Sensor } from "./sensor_data";
     import { onMount } from "svelte";
+    import type { AbsolteTrafo } from "./msg_types";
+    import { three_functions } from "./message_handler";
 
     let div: HTMLDivElement;
 
-    onMount(init_threejs);
+    onMount(() => {
+        three_functions.set({
+            on_pointcloud: on_pointcloud,
+            on_sensor_metadata: on_sensor_metadata,
+            reset: reset,
+        });
+        init_threejs();
+    });
 
     // threejs variables
     let scene: THREE.Scene;
@@ -46,7 +55,7 @@
     }
 
     let sensors: Map<string, Sensor>;
-    export function reset() {
+    function reset() {
         if (sensors) {
             Sensor.index_counter = 0;
             for (let sensor of sensors.values()) sensor.destruct();
@@ -54,36 +63,22 @@
         sensors = new Map();
     }
 
-    // ws handler
-    export function on_message(data: any) {
-        // TODO parse message somewhere else...
-        // this is called on every Websocket message
-        let type: "pointcloud" | "metadata" = data.type;
-        let topic: string = data.topic;
+    function on_pointcloud(topic: string, points: number[], colors: number[]) {
         if (!sensors.has(topic)) {
             sensors.set(topic, new Sensor(topic, scene));
         }
-        let sensor = sensors.get(topic)!;
-        if (type == "metadata") {
-            let payload = data.data as {
-                reflector_locations: number[];
-                transformation: {
-                    t: number[];
-                    R_quat: number[];
-                };
-            };
-            sensor.on_metadata(
-                payload.reflector_locations,
-                payload.transformation,
-            );
+        sensors.get(topic)!.on_frame(points, colors);
+    }
+
+    function on_sensor_metadata(
+        topic: string,
+        reflector_locations: number[],
+        transformation: AbsolteTrafo,
+    ) {
+        if (!sensors.has(topic)) {
+            sensors.set(topic, new Sensor(topic, scene));
         }
-        if (type == "pointcloud") {
-            let payload = data.data as {
-                points: number[];
-                colors: number[];
-            };
-            sensor.on_frame(payload.points, payload.colors);
-        }
+        sensors.get(topic)!.on_metadata(reflector_locations, transformation);
     }
 
     // Render loop

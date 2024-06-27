@@ -1,13 +1,12 @@
 <script lang="ts">
+    import { on_message } from "./message_handler";
     import Three from "./Three.svelte";
     import { connect_websocket } from "./ws";
 
-    let three_on_msg: (data: any) => void;
-    let three_reset: () => void;
-
     function on_connect_button() {
-        three_reset();
-        connect_websocket((data) => three_on_msg(data));
+        connect_websocket((data) => {
+            on_message(data);
+        });
     }
 </script>
 
@@ -18,5 +17,5 @@
         value="ws://localhost:6789"
     />
     <button on:click={on_connect_button}>Connect WS</button>
-    <Three bind:reset={three_reset} bind:on_message={three_on_msg}></Three>
+    <Three></Three>
 </main>
