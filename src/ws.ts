@@ -2,7 +2,8 @@
 let socket: WebSocket | undefined = undefined;
 let no_alerts = false;
 
-export function connect(msg_callback: (data: any) => void) {
+// TODO set state store to show state
+export function connect_websocket(msg_callback: (data: any) => void) {
     console.log("Connecting...");
     if (socket) {
         socket.close();
