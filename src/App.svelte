@@ -1,10 +1,19 @@
 <script lang="ts">
-    import { on_message } from "./message_handler";
+    import { get } from "svelte/store";
+    import {
+        on_message,
+        pair_metadata,
+        three_functions,
+    } from "./message_handler";
     import Three from "./Three.svelte";
     import TrafoOverview from "./TrafoOverview.svelte";
     import { connect_websocket, state } from "./ws";
 
     function on_connect_button() {
+        // reset everything
+        pair_metadata.set(new Map());
+        get(three_functions).reset();
+        // connect
         connect_websocket((data) => {
             on_message(data);
         });
