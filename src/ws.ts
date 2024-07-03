@@ -3,12 +3,13 @@ import { writable } from "svelte/store";
 let socket: WebSocket | undefined = undefined;
 export let state = writable("Not connected");
 
-export function connect_websocket(msg_callback: (data: any) => void) {
+export function connect_websocket(url: string, msg_callback: (data: any) => void) {
+    let error = false;
     state.set("Connecting...");
     if (socket) {
         socket.close();
     }
-    socket = new WebSocket((document.getElementById("address_input") as HTMLInputElement).value);
+    socket = new WebSocket(url);
     socket.addEventListener("message", (event) => {
         let data = JSON.parse(event.data);
         msg_callback(data);
@@ -18,13 +19,17 @@ export function connect_websocket(msg_callback: (data: any) => void) {
         state.set("Connected");
     });
     socket.addEventListener("error", () => {
+        error = true;
         socket = undefined;
         console.log("Connection error");
         state.set("Connection error");
     });
     socket.addEventListener("close", () => {
         socket = undefined;
-        console.log("Connection closed");
-        state.set("Connection closed");
+        if (!error) {
+            // on error, keep error message/state
+            console.log("Connection closed");
+            state.set("Connection closed");
+        }
     });
 }
