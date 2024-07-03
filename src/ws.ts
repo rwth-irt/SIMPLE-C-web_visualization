@@ -3,7 +3,13 @@ import { writable } from "svelte/store";
 let socket: WebSocket | undefined = undefined;
 export let state = writable("Not connected");
 
-export function connect_websocket(url: string, msg_callback: (data: any) => void) {
+/**
+ * Connect to a websocket server.
+ * @param url The URL of the websocket server to connect to
+ * @param msg_callback A callback function to call with incoming messages
+ * @returns A function which will send messages via this websocket
+ */
+export function connect_websocket(url: string, msg_callback: (data: any) => void): ((msg: string) => void) {
     let error = false;
     state.set("Connecting...");
     if (socket) {
@@ -32,4 +38,9 @@ export function connect_websocket(url: string, msg_callback: (data: any) => void
             state.set("Connection closed");
         }
     });
+    return (msg: string) => {
+        if (socket && socket.readyState == WebSocket.OPEN) {
+            socket.send(msg);
+        }
+    }
 }

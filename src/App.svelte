@@ -24,10 +24,10 @@
     const LOCALSTORAGE_KEY = "lidar_align_monitor_last_url";
     const DEFAULT_URL = "ws://localhost:6789";
 
+    let send_message: (msg: string) => void;
+
     function on_connect_button() {
-        // reset everything
-        pair_metadata.set(new Map());
-        get(three_functions).reset();
+        reset();
         // Try to save current URL to LocalStorage
         try {
             localStorage.setItem(LOCALSTORAGE_KEY, url);
@@ -35,9 +35,19 @@
             console.log("Could not write URL to localstorage");
         }
         // connect
-        connect_websocket(url, (data) => {
+        send_message = connect_websocket(url, (data) => {
             on_message(data);
         });
+    }
+
+    function on_reset_button() {
+        reset();
+        send_message("reset");
+    }
+
+    function reset() {
+        pair_metadata.set(new Map());
+        get(three_functions).reset();
     }
 </script>
 
@@ -49,6 +59,7 @@
             bind:value={url}
         />
         <button on:click={on_connect_button}>Connect WS</button>
+        <button on:click={on_reset_button}>Reset calibration</button>
         Connection state: <b>{$state}</b>
         <div id="flexdiv">
             <Three></Three>
