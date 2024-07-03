@@ -48,7 +48,9 @@
             id="address_input"
             bind:value={url}
         />
-        <button on:click={on_connect_button}>Connect WS</button>
+        <button on:click={on_connect_button} class="btn btn-outline-primary"
+            >Connect WS</button
+        >
         Connection state: <b>{$state}</b>
         <div id="flexdiv">
             <Three></Three>
