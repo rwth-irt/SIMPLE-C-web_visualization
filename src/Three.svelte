@@ -91,10 +91,3 @@
 </script>
 
 <div id="threediv" bind:this={div}></div>
-
-<style>
-    #threediv {
-        border: 1px solid gray;
-        margin-top: 1em;
-    }
-</style>

@@ -42,30 +42,44 @@
 </script>
 
 <main>
-    <div id="maindiv">
-        Websocket server: <input
-            type="text"
-            id="address_input"
-            bind:value={url}
-        />
-        <button on:click={on_connect_button} class="btn btn-outline-primary"
-            >Connect WS</button
-        >
-        Connection state: <b>{$state}</b>
-        <div id="flexdiv">
-            <Three></Three>
-            <TrafoOverview></TrafoOverview>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-9">
+                <div class="card"> <!--use a bootstrap form for this-->
+                    <div
+                        class="fw-bold card-header {$state == 'Connected'
+                            ? 'text-bg-success'
+                            : 'text-bg-warning'}"
+                    >
+                        Connection ({$state})
+                    </div>
+                    <div class="card-body">
+                        Websocket server: <input
+                            type="text"
+                            id="address_input"
+                            bind:value={url}
+                        />
+                        <button
+                            on:click={on_connect_button}
+                            class="btn btn-outline-primary">Connect WS</button
+                        >
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header fw-bold">3D viewer</div>
+                    <div class="card-body">
+                        <Three></Three>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-header fw-bold">Transformation info</div>
+                    <div class="card-body">
+                        <TrafoOverview></TrafoOverview>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
-
-<style>
-    #flexdiv {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-    #maindiv {
-        margin: 1em;
-    }
-</style>

@@ -21,15 +21,15 @@ export function connect_websocket(url: string, msg_callback: (data: any) => void
     socket.addEventListener("error", () => {
         error = true;
         socket = undefined;
-        console.log("Connection error");
-        state.set("Connection error");
+        console.log("Error");
+        state.set("Error");
     });
     socket.addEventListener("close", () => {
         socket = undefined;
         if (!error) {
             // on error, keep error message/state
-            console.log("Connection closed");
-            state.set("Connection closed");
+            console.log("Closed");
+            state.set("Closed");
         }
     });
 }
