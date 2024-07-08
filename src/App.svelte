@@ -41,45 +41,44 @@
     }
 </script>
 
-<main>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-9">
-                <div class="card"> <!--use a bootstrap form for this-->
-                    <div
-                        class="fw-bold card-header {$state == 'Connected'
-                            ? 'text-bg-success'
-                            : 'text-bg-warning'}"
-                    >
-                        Connection ({$state})
-                    </div>
-                    <div class="card-body">
-                        Websocket server: <input
-                            type="text"
-                            id="address_input"
-                            bind:value={url}
-                        />
-                        <button
-                            on:click={on_connect_button}
-                            class="btn btn-outline-primary">Connect WS</button
-                        >
-                    </div>
+<div class="container-fluid h-100 p-4">
+    <div class="row h-100">
+        <div class="col-9 d-flex flex-column">
+            <div class="card mb-3">
+                <!--use a bootstrap form for this!-->
+                <div
+                    class="fw-bold card-header {$state == 'Connected'
+                        ? 'text-bg-success'
+                        : 'text-bg-warning'}"
+                >
+                    Connection ({$state})
                 </div>
-                <div class="card">
-                    <div class="card-header fw-bold">3D viewer</div>
-                    <div class="card-body">
-                        <Three></Three>
-                    </div>
+                <div class="card-body">
+                    Websocket server: <input
+                        type="text"
+                        id="address_input"
+                        bind:value={url}
+                    />
+                    <button
+                        on:click={on_connect_button}
+                        class="btn btn-outline-primary">Connect WS</button
+                    >
                 </div>
             </div>
-            <div class="col">
-                <div class="card">
-                    <div class="card-header fw-bold">Transformation info</div>
-                    <div class="card-body">
-                        <TrafoOverview></TrafoOverview>
-                    </div>
+            <div class="card flex-grow-1">
+                <div class="card-header fw-bold">3D viewer</div>
+                <div class="card-body"> 
+                    <Three></Three>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header fw-bold">Transformation info</div>
+                <div class="card-body">
+                    <TrafoOverview></TrafoOverview>
                 </div>
             </div>
         </div>
     </div>
-</main>
+</div>

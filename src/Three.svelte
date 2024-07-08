@@ -6,7 +6,7 @@
     import type { AbsolteTrafo } from "./msg_types";
     import { three_functions } from "./message_handler";
 
-    let div: HTMLDivElement;
+    let canvas: HTMLCanvasElement;
 
     onMount(() => {
         three_functions.set({
@@ -19,24 +19,42 @@
 
     // threejs variables
     let scene: THREE.Scene;
-    let camera: THREE.Camera;
+    let camera: THREE.PerspectiveCamera;
     let renderer: THREE.Renderer;
     let controls: OrbitControls;
     let marker: THREE.Mesh;
+
+    function update_render_size() {
+        // https://threejs.org/manual/#en/responsive
+        // TODO:
+        // The CSS to set the canvas element's size is correct: If renderer.setSize is never called (commented out), it is set correctly.
+        // However, when we do call renderer.setSize, the canvas' clientWidth is not 
+        let canvas = renderer.domElement;
+        let width = canvas.clientWidth;
+        let height = canvas.clientHeight;
+        if (canvas.width !== width || canvas.height !== height) {
+            console.debug(`Setting renderer size to ${width}x${height}`);
+            renderer.setSize(width, height, false);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+    }
 
     function init_threejs() {
         // Basic Three.js setup
         THREE.Object3D.DEFAULT_UP = new THREE.Vector3(0, 0, 1); // set z up, as in lidar data
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xfafafa);
-        let height = window.innerHeight * 0.8;
-        let width = height * 1.3;
-        camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+
+        camera = new THREE.PerspectiveCamera(75); // fov
         camera.position.set(0, 0, 20);
 
-        renderer = new THREE.WebGLRenderer();
-        renderer.setSize(width, height);
-        div.appendChild(renderer.domElement);
+        renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true,
+        });
+
+        update_render_size();
 
         // OrbitControls for camera
         controls = new OrbitControls(camera, renderer.domElement);
@@ -51,7 +69,7 @@
         scene.add(marker);
 
         reset();
-        animate();
+        requestAnimationFrame(animate);
     }
 
     let sensors: Map<string, Sensor>;
@@ -83,11 +101,20 @@
 
     // Render loop
     function animate() {
-        requestAnimationFrame(animate);
+        update_render_size();
         marker.position.copy(controls.target);
         controls.update();
         renderer.render(scene, camera);
+        requestAnimationFrame(animate);
     }
 </script>
 
-<div id="threediv" bind:this={div}></div>
+<canvas id="c" bind:this={canvas}></canvas>
+
+<style>
+    #c {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+</style>
