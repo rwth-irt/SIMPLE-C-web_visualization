@@ -14,45 +14,46 @@
     }
 </script>
 
-<details open>
-    <summary><b>{$data.from_topic} → {$data.to_topic}</b></summary>
-    <div id="trafodiv">
-        <b>Transformation</b>
-        <table>
-            <tr>
-                <td>Translation:</td>
-                <td>{digits($data.transformation.t[0])}</td>
-                <td>{digits($data.transformation.t[1])}</td>
-                <td>{digits($data.transformation.t[2])}</td>
-            </tr>
-            <tr>
-                <td>Rotation</td>
-                <td>x: {digits(rad2deg($data.transformation.R_euler[0]))}°</td>
-                <td>y: {digits(rad2deg($data.transformation.R_euler[1]))}°</td>
-                <td>z: {digits(rad2deg($data.transformation.R_euler[2]))}°</td>
-            </tr>
+<div class="card mb-3">
+    <h6 class="card-header card-title">
+        {$data.from_topic} → {$data.to_topic}
+    </h6>
+    <div class="card-body p-0">
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th scope="row"><b>Translation:</b></th>
+                    <td>{digits($data.transformation.t[0])} m</td>
+                    <td>{digits($data.transformation.t[1])} m</td>
+                    <td>{digits($data.transformation.t[2])} m</td>
+                </tr>
+                <tr>
+                    <th scope="row"><b>Rotation</b></th>
+                    <td>
+                        x: {digits(rad2deg($data.transformation.R_euler[0]))}°
+                    </td>
+                    <td>
+                        y: {digits(rad2deg($data.transformation.R_euler[1]))}°
+                    </td>
+                    <td>
+                        z: {digits(rad2deg($data.transformation.R_euler[2]))}°
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row"><b>Rotation sensitivity:</b></th>
+                    <td colspan="3">
+                        {digits($data.transformation.sensitivity_number, 8)}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><b>Points used:</b></th>
+                    <td colspan="3">
+                        {digits($data.used_point_pairs)} /
+                        {digits($data.total_point_pairs)}
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
-
-    <b>Sensitivity:</b>
-    {digits($data.transformation.sensitivity_number, 6)}
-    <br />
-    <b>Points used:</b>
-    {digits($data.used_point_pairs)} / {digits($data.total_point_pairs)}
-</details>
-
-<style>
-    table {
-        border-collapse: collapse;
-    }
-    td {
-        border: 1px solid;
-    }
-    details {
-        margin: 1em;
-    }
-    #trafodiv {
-        margin-top: 0.5em;
-        margin-bottom: 0.5em;
-    }
-</style>
+</div>

@@ -53,15 +53,15 @@
 
 <div class="container-fluid h-100 p-4">
     <div class="row h-100">
-        <div class="col-9 d-flex flex-column">
+        <div class="col d-flex flex-column">
             <div class="card mb-3">
-                <div
-                    class="fw-bold card-header {$state == 'Connected'
+                <h5
+                    class="card-title fw-bold card-header {$state == 'Connected'
                         ? 'text-bg-success'
                         : 'text-bg-warning'}"
                 >
                     Connection ({$state})
-                </div>
+                </h5>
                 <div class="card-body">
                     <div class="row">
                         <div class="col">
@@ -88,23 +88,25 @@
                                 on:click={on_reset_button}
                                 class="btn btn-outline-danger"
                                 disabled={$state != "Connected"}
-                                >Reset calibration on server</button
-                            >
+                                >Reset calibration on server
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="card flex-grow-1">
-                <div class="card-header fw-bold">3D viewer</div>
+                <h5 class="card-header card-title fw-bold">3D viewer</h5>
                 <div class="card-body">
                     <Three></Three>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card">
-                <div class="card-header fw-bold">Transformation info</div>
-                <div class="card-body">
+        <div class="col-3 h-100">
+            <div class="card h-100">
+                <h5 class="card-header card-title fw-bold">
+                    Transformation info
+                </h5>
+                <div class="card-body overflow-y-auto">
                     <TrafoOverview></TrafoOverview>
                 </div>
             </div>
