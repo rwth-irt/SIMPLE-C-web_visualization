@@ -55,7 +55,6 @@
     <div class="row h-100">
         <div class="col-9 d-flex flex-column">
             <div class="card mb-3">
-                <!--use a bootstrap form for this!-->
                 <div
                     class="fw-bold card-header {$state == 'Connected'
                         ? 'text-bg-success'
@@ -64,22 +63,35 @@
                     Connection ({$state})
                 </div>
                 <div class="card-body">
-                    Websocket server: <input
-                        type="text"
-                        id="address_input"
-                        bind:value={url}
-                    />
-                    <button
-                        on:click={on_connect_button}
-                        class="btn btn-outline-primary">Connect WS</button
-                    >
-
-                    <button
-                        on:click={on_reset_button}
-                        class="btn btn-outline-danger"
-                        disabled={$state != "Connected"}
-                        >Reset calibration on server</button
-                    >
+                    <div class="row">
+                        <div class="col">
+                            <!-- URL field -->
+                            <div class="input-group">
+                                <span class="input-group-text"
+                                    >Websocket server URL:</span
+                                >
+                                <input
+                                    type="text"
+                                    id="address_input"
+                                    class="form-control"
+                                    bind:value={url}
+                                />
+                                <button
+                                    on:click={on_connect_button}
+                                    class="btn btn-outline-primary"
+                                    >Connect WS</button
+                                >
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <button
+                                on:click={on_reset_button}
+                                class="btn btn-outline-danger"
+                                disabled={$state != "Connected"}
+                                >Reset calibration on server</button
+                            >
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="card flex-grow-1">
