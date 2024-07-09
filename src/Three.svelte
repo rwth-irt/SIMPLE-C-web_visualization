@@ -7,6 +7,7 @@
     import { three_functions } from "./message_handler";
 
     let canvas: HTMLCanvasElement;
+    let div: HTMLDivElement;
 
     onMount(() => {
         three_functions.set({
@@ -15,6 +16,7 @@
             reset: reset,
         });
         init_threejs();
+        new ResizeObserver(update_render_size).observe(div);
     });
 
     // threejs variables
@@ -26,18 +28,18 @@
 
     function update_render_size() {
         // https://threejs.org/manual/#en/responsive
-        // TODO:
-        // The CSS to set the canvas element's size is correct: If renderer.setSize is never called (commented out), it is set correctly.
-        // However, when we do call renderer.setSize, the canvas' clientWidth is not 
+        // However, CSS size of canvas does not work properly once we have set canvas.width/height.
+        // Therefore, we position canvas absolutely to follow the div!
         let canvas = renderer.domElement;
-        let width = canvas.clientWidth;
-        let height = canvas.clientHeight;
-        if (canvas.width !== width || canvas.height !== height) {
-            console.debug(`Setting renderer size to ${width}x${height}`);
-            renderer.setSize(width, height, false);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-        }
+        // move canvas
+        canvas.style.left = div.style.left;
+        canvas.style.top = div.style.top;
+        // set size etc.
+        let width = div.clientWidth;
+        let height = div.clientHeight;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
     }
 
     function init_threejs() {
@@ -101,7 +103,6 @@
 
     // Render loop
     function animate() {
-        update_render_size();
         marker.position.copy(controls.target);
         controls.update();
         renderer.render(scene, camera);
@@ -109,12 +110,6 @@
     }
 </script>
 
-<canvas id="c" bind:this={canvas}></canvas>
-
-<style>
-    #c {
-        width: 100%;
-        height: 100%;
-        display: block;
-    }
-</style>
+<canvas style="position: absolute;" bind:this={canvas}></canvas>
+<!--The div the canvas will be positioned to cover-->
+<div style="width: 100%; height: 100%;" bind:this={div}></div>
