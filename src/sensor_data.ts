@@ -67,7 +67,7 @@ export class Sensor {
         if (values_to_copy != points.length) {
             console.log("WARNING: BUFFER IS TOO SMALL!")
         }
-        // copy data to buffers, parsed json can then be gcollected.
+        // copy data to buffers, parsed json can then be garbage-collected.
         for (let i = 0; i < values_to_copy; i++) {
             points_buffer[i] = points[i];
         }
@@ -151,9 +151,9 @@ let colors = {
     normal: [1., 1., 0.]  // yellow
 }
 let basic_colors = [
-    [0.59, 0.55, 0.5], // orange-ish tint
-    [0.5, 0.5, 0.59], // blue tint
-    [0.5, 0.59, 0.5], // green tint
+    [0.7, 0.6, 0.3], // orange-ish tint
+    [0.3, 0.3, 0.6], // blue tint
+    [0.3, 0.6, 0.3], // green tint
 ]
 
 function get_color_from_index(i: number, frame_index: number): number[] {

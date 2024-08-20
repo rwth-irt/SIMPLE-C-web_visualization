@@ -1,5 +1,5 @@
 {
-  "name": "lidar_calib_monitor",
+  "name": "simplex_calibration_tool",
   "private": true,
   "version": "0.0.0",
   "type": "module",
