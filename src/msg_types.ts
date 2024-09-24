@@ -33,7 +33,8 @@ export interface PairMetadataMsg {
         sensitivity_number: number
     }
     used_point_pairs: number,
-    total_point_pairs: number
+    total_point_pairs: number,
+    std_dimensions: number[]
 }
 
 export interface TrackingStateMsg {

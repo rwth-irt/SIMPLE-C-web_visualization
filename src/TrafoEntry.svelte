@@ -53,6 +53,12 @@
                         {digits($data.total_point_pairs)}
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row"><b>Standard Deviation:</b></th>
+                    <td>x: {digits($data.std_dimensions[0])} m</td>
+                    <td>y: {digits($data.std_dimensions[1])} m</td>
+                    <td>z: {digits($data.std_dimensions[2])} m</td>
+                </tr>
             </tbody>
         </table>
     </div>
